@@ -4,7 +4,7 @@ class SearchBtn extends Component {
   render(): JSX.Element {
     return (
       <button
-        className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 shadow-sm transition hover:bg-gray-50 active:shadow-none"
+        className="rounded-xl border border-indigo-500 bg-indigo-500 px-5 py-2 font-semibold text-white shadow transition hover:bg-indigo-600 hover:shadow-md focus:ring-2 focus:ring-indigo-300 focus:outline-none active:shadow-none"
         type="submit"
       >
         Search

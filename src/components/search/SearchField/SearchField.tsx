@@ -1,4 +1,4 @@
-import { Component, type ChangeEvent, type ReactNode } from 'react';
+import { Component, type ChangeEvent, type JSX, type ReactNode } from 'react';
 
 class SearchField extends Component {
   state = {
@@ -11,16 +11,16 @@ class SearchField extends Component {
     });
   };
 
-  render(): ReactNode {
+  render(): JSX.Element | ReactNode {
     console.log('Search query:', this.state.searchQuery); // Debugging line
     return (
       <label
-        className="flex flex-col items-start gap-2 md:flex-row md:items-center"
+        className="flex w-full flex-col gap-1 md:flex-row md:items-center md:gap-2"
         htmlFor="search"
       >
-        Search
+        <span className="font-medium text-gray-800 md:w-20">Search</span>
         <input
-          className="w-full rounded-md border border-gray-300 p-2"
+          className="w-full rounded-xl border border-gray-200 bg-transparent px-3 py-2 text-gray-900 transition placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 focus:outline-none"
           type="text"
           id="search"
           name="search"
