@@ -1,6 +1,7 @@
 import { Component, type JSX, type ReactNode } from 'react';
 import SearchForm from './components/search/SearchForm/SearchForm';
 import ResultsList from './components/results/ResultsList/ResultsList';
+import Loader from './components/loader/Loader';
 import './App.css';
 
 export type Character = {
@@ -30,16 +31,24 @@ class App extends Component<AppState> {
     },
     query: '',
     renderData: [],
+    isLoading: false,
   };
 
   componentDidMount(): void {
+    this.setState({ isLoading: true });
     fetch(`${this.state.serverUrl}/character`)
       .then((response) => response.json())
       .then((data) => {
-        this.setState({ serverData: data, renderData: data.results });
+        this.setState({
+          serverData: data,
+          renderData: data.results,
+        });
       })
       .catch((error) => {
         console.error('Error fetching data:', error);
+      })
+      .finally(() => {
+        this.setState({ isLoading: false });
       });
   }
 
@@ -62,7 +71,11 @@ class App extends Component<AppState> {
     return (
       <>
         <SearchForm onQuerySubmit={this.handleQuery} />
-        <ResultsList data={this.state.renderData} />
+        {this.state.isLoading ? (
+          <Loader />
+        ) : (
+          <ResultsList data={this.state.renderData} />
+        )}
       </>
     );
   }
