@@ -1,18 +1,12 @@
 import { Component, type ChangeEvent, type JSX, type ReactNode } from 'react';
 
-class SearchField extends Component {
-  state = {
-    searchQuery: '',
-  };
+type SearchFieldProps = {
+  searchQuery: string;
+  onQueryChange: (e: ChangeEvent<HTMLInputElement>) => void;
+};
 
-  handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    this.setState({
-      searchQuery: e.target.value,
-    });
-  };
-
+class SearchField extends Component<SearchFieldProps> {
   render(): JSX.Element | ReactNode {
-    console.log('Search query:', this.state.searchQuery); // Debugging line
     return (
       <label
         className="flex w-full flex-col gap-1 md:flex-row md:items-center md:gap-2"
@@ -24,8 +18,8 @@ class SearchField extends Component {
           type="search"
           id="search"
           name="search"
-          value={this.state.searchQuery}
-          onChange={this.handleSearchChange}
+          value={this.props.searchQuery}
+          onChange={this.props.onQueryChange}
           placeholder="Enter your query..."
         />
       </label>
