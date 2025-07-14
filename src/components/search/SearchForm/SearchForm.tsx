@@ -12,10 +12,17 @@ type SearchFormProps = {
   onQuerySubmit: (query: string) => void;
 };
 
-class SearchForm extends Component<SearchFormProps> {
-  state = {
-    searchQuery: '',
-  };
+type SearchFormState = {
+  searchQuery: string;
+};
+
+class SearchForm extends Component<SearchFormProps, SearchFormState> {
+  constructor(props: SearchFormProps) {
+    super(props);
+    this.state = {
+      searchQuery: localStorage.getItem('searchQuery') || '',
+    };
+  }
 
   handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     this.setState({
@@ -25,6 +32,7 @@ class SearchForm extends Component<SearchFormProps> {
 
   handleSearchSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
+    localStorage.setItem('searchQuery', this.state.searchQuery);
     this.props.onQuerySubmit(this.state.searchQuery);
   };
 
