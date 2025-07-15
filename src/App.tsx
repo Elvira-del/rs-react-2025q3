@@ -1,6 +1,7 @@
 import { Component, type JSX, type ReactNode } from 'react';
 import SearchForm from './components/search/SearchForm/SearchForm';
 import ResultsList from './components/results/ResultsList/ResultsList';
+import ErrorTriggerBtn from './components/error/ErrorTriggerBtn/ErrorTriggerBtn';
 import Loader from './components/loader/Loader';
 import './App.css';
 
@@ -20,9 +21,11 @@ type AppState = {
   };
   query: string;
   renderData: Character[];
+  isLoading: boolean;
+  throwError: boolean;
 };
 
-class App extends Component<AppState> {
+class App extends Component<unknown, AppState> {
   state = {
     serverUrl: 'https://rickandmortyapi.com/api',
     serverData: {
@@ -32,6 +35,7 @@ class App extends Component<AppState> {
     query: '',
     renderData: [],
     isLoading: false,
+    throwError: false,
   };
 
   componentDidMount(): void {
@@ -67,9 +71,17 @@ class App extends Component<AppState> {
     this.setState({ query });
   };
 
+  handleTriggerError = (): void => {
+    this.setState({ throwError: true });
+  };
+
   render(): JSX.Element | ReactNode {
+    if (this.state.throwError) {
+      throw new Error('Simulated error for testing ErrorBoundary');
+    }
     return (
       <>
+        <ErrorTriggerBtn onTrigger={this.handleTriggerError} />
         <SearchForm onQuerySubmit={this.handleQuery} />
         {this.state.isLoading ? (
           <Loader />
