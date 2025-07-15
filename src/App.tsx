@@ -56,7 +56,7 @@ class App extends Component<unknown, AppState> {
       });
   }
 
-  componentDidUpdate(prevProps, prevState): void {
+  componentDidUpdate(_: unknown, prevState: { query: string }): void {
     if (prevState.query !== this.state.query) {
       const filteredData = this.state.query
         ? this.state.serverData.results.filter((item: Character) =>
