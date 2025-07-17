@@ -95,3 +95,30 @@ test('triggers search callback with correct parameters', async () => {
   expect(handleSearchTermSubmit).toHaveBeenCalledOnce();
   expect(handleSearchTermSubmit).toHaveBeenCalledWith('Jerry');
 });
+
+test('retrieves saved search term on component mount', () => {
+  localStorage.setItem('searchQuery', 'Jerry');
+
+  const { getByRole } = render(<SearchForm onQuerySubmit={() => {}} />);
+
+  expect(getByRole('searchbox')).toHaveValue('Jerry');
+});
+
+test('overwrites existing localStorage value when new search is performed', async () => {
+  const user = userEvent.setup();
+
+  localStorage.setItem('searchQuery', 'Rick');
+
+  const { getByRole } = render(<SearchForm onQuerySubmit={() => {}} />);
+
+  expect(localStorage.getItem('searchQuery')).toBe('Rick');
+
+  const searchInput = getByRole('searchbox');
+  await user.clear(searchInput);
+  await user.type(searchInput, 'Jerry');
+
+  const searchButton = getByRole('button', { name: /search/i });
+  await user.click(searchButton);
+
+  expect(localStorage.getItem('searchQuery')).toBe('Jerry');
+});
