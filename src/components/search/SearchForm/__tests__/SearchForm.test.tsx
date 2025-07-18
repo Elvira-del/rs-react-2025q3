@@ -60,6 +60,8 @@ test('saves search term to localStorage when search button is clicked', async ()
   expect(localStorage.getItem('searchQuery')).toBe('Morty');
 });
 
+// KNOWN LIMITATION: Test skipped because trim functionality didn't exist yet.
+
 test.skip('trims whitespace from search input before saving', async () => {
   const user = userEvent.setup();
   const handleSearchTermSubmit = vi.fn();
