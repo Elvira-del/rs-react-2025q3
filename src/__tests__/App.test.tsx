@@ -50,3 +50,23 @@ test.skip('shows appropriate error for different HTTP status codes (4xx, 5xx)', 
 
   expect(getByText(/not found/i)).toBeInTheDocument();
 });
+
+test('shows/hides based on loading prop', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ results: [] }),
+      })
+    )
+  );
+
+  const { getByText, queryByText } = render(<App />);
+
+  expect(getByText(/loading/i)).toBeInTheDocument();
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  expect(queryByText(/loading/i)).not.toBeInTheDocument();
+});
