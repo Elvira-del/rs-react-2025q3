@@ -1,6 +1,6 @@
 import { beforeEach, expect, test, vi } from 'vitest';
-import ResultsList from '../ResultsList';
 import { render, screen } from '@testing-library/react';
+import ResultsList from '../ResultsList';
 
 const mockCharacters = [
   {
@@ -38,6 +38,9 @@ test('renders correct number of items when data is provided', () => {
   expect(listItems).toHaveLength(mockCharacters.length);
 });
 
+// KNOWN LIMITATION: ResultsList component does not handle empty data array.
+// Test temporarily skipped before component correction.
+
 test.skip('displays `no results` message when data array is empty', () => {
   const { getByText } = render(<ResultsList data={[]} />);
 
@@ -72,4 +75,28 @@ test.skip('handles missing or undefined data gracefully', () => {
   const listItem = list.querySelectorAll('li');
 
   expect(listItem).toHaveLength(0);
+});
+
+// KNOWN LIMITATION: ResultsItem doesn't exist yet, and will be implemented later.
+// Test temporarily skipped before component implementation.
+
+test.skip('displays item name and description correctly', () => {
+  // const { getByTestId } = render(<ResultsItem data={mockCharacters} />);
+
+  const name = screen.getByTestId('character-name');
+  const status = screen.getByTestId('character-status');
+  const species = screen.getByTestId('character-species');
+
+  expect(name).toHaveTextContent(mockCharacters[0].name);
+  expect(status).toHaveTextContent(`Status: ${mockCharacters[0].status}`);
+  expect(species).toHaveTextContent(`Species: ${mockCharacters[0].species}`);
+});
+
+test.skip('handles missing props gracefully', () => {
+  // expect(() => {
+  //   render(<ResultsItem data={[]} />);
+  // }).not.toThrow();
+
+  const resultsItem = screen.getByRole('listitem');
+  expect(resultsItem).not.toBeInTheDocument();
 });
