@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import App from '../App';
 
@@ -95,9 +95,6 @@ test('makes initial API call on component mount', async () => {
   render(<App />);
 
   expect(fetchAPI).toHaveBeenCalledOnce();
-  expect(fetchAPI).toHaveBeenCalledWith(
-    'https://rickandmortyapi.com/api/character'
-  );
 });
 
 test('handles search term from localStorage on initial load', () => {
@@ -148,4 +145,59 @@ test('manages loading states during API calls', async () => {
   expect(character).toBeInTheDocument();
 
   expect(queryByText(/loading/i)).not.toBeInTheDocument();
+});
+
+test('calls API with correct parameters', () => {
+  const fetchAPI = vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ results: mockCharacter }),
+    })
+  );
+  vi.stubGlobal('fetch', fetchAPI);
+
+  render(<App />);
+
+  expect(fetchAPI).toHaveBeenCalledWith(
+    'https://rickandmortyapi.com/api/character'
+  );
+});
+
+test('handles successful API responses', async () => {
+  const fetchAPI = vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ results: mockCharacter }),
+    })
+  );
+  vi.stubGlobal('fetch', fetchAPI);
+
+  const { getByText } = render(<App />);
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  expect(getByText(/rick sanchez/i)).toBeInTheDocument();
+});
+
+test('handles API error responses', async () => {
+  const fetchAPI = vi.fn(() =>
+    Promise.resolve({
+      ok: false,
+      status: 500,
+      statusText: 'Internal Server Error',
+    })
+  );
+  vi.stubGlobal('fetch', fetchAPI);
+  const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+  render(<App />);
+
+  await waitFor(() => {
+    expect(errorSpy).toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith(
+      'Error fetching data:',
+      expect.any(Error)
+    );
+  });
+
+  errorSpy.mockRestore();
 });
