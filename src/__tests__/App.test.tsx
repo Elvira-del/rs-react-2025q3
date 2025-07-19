@@ -1,4 +1,5 @@
 import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import App from '../App';
 
@@ -200,4 +201,60 @@ test('handles API error responses', async () => {
   });
 
   errorSpy.mockRestore();
+});
+
+test('updates component state based on API responses', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            results: [
+              {
+                id: 42,
+                name: 'Birdperson',
+                status: 'Alive',
+                species: 'Bird-Person',
+                image:
+                  'https://rickandmortyapi.com/api/character/avatar/47.jpeg',
+              },
+            ],
+          }),
+      })
+    )
+  );
+
+  const { findByText } = render(<App />);
+  const character = await findByText('Birdperson');
+
+  expect(character).toBeInTheDocument();
+});
+
+test('manages search term state correctly', async () => {
+  const user = userEvent.setup();
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            results: [],
+          }),
+      })
+    )
+  );
+
+  const { getByRole } = render(<App />);
+
+  const searchInput = getByRole('searchbox');
+  await user.clear(searchInput);
+  await user.type(searchInput, 'Morty');
+
+  const searchBtn = getByRole('button', { name: /search/i });
+  await user.click(searchBtn);
+
+  expect(searchInput).toHaveValue('Morty');
 });
