@@ -1,7 +1,7 @@
 import { Component, type JSX, type ReactNode } from 'react';
-import ErrorTriggerBtn from './components/error/ErrorTriggerBtn/ErrorTriggerBtn';
 import { SearchForm } from './components/search/SearchForm/SearchForm';
 import { ResultsList } from './components/results/ResultsList/ResultsList';
+import { ErrorTriggerBtn } from './components/error/ErrorTriggerBtn/ErrorTriggerBtn';
 import { Loader } from './components/loader/Loader';
 import './App.css';
 

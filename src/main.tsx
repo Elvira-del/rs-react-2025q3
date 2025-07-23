@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import ErrorBoundary from './components/error/ErrorBoundary/ErrorBoundary.tsx';
-import FallbackUI from './components/error/FallbackUI/FallbackUI.tsx';
+import { FallbackUI } from './components/error/FallbackUI/FallbackUI.tsx';
 import App from './App.tsx';
 import './index.css';
 
