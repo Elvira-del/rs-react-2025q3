@@ -1,8 +1,8 @@
 import { Component, type JSX, type ReactNode } from 'react';
-import ResultsList from './components/results/ResultsList/ResultsList';
 import ErrorTriggerBtn from './components/error/ErrorTriggerBtn/ErrorTriggerBtn';
-import Loader from './components/loader/Loader';
 import { SearchForm } from './components/search/SearchForm/SearchForm';
+import { ResultsList } from './components/results/ResultsList/ResultsList';
+import { Loader } from './components/loader/Loader';
 import './App.css';
 
 export type Character = {
