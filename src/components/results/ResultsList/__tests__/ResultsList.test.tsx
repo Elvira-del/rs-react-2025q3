@@ -1,6 +1,6 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import ResultsList from '../ResultsList';
+import { ResultsList } from '../ResultsList';
 
 const mockCharacters = [
   {

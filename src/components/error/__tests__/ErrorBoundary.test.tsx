@@ -2,8 +2,8 @@ import { expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
 import userEvent from '@testing-library/user-event';
-import ErrorTriggerBtn from '../ErrorTriggerBtn/ErrorTriggerBtn';
-import FallbackUI from '../FallbackUI/FallbackUI';
+import { ErrorTriggerBtn } from '../ErrorTriggerBtn/ErrorTriggerBtn';
+import { FallbackUI } from '../FallbackUI/FallbackUI';
 import App from '../../../App';
 
 const TestError = vi.fn(() => {
