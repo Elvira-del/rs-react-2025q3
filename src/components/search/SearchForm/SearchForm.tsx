@@ -1,15 +1,14 @@
-import { useState, type ChangeEvent, type FC, type FormEvent } from 'react';
+import { type ChangeEvent, type FC, type FormEvent } from 'react';
 import { SearchField } from '../SearchField/SearchField';
 import { SearchBtn } from '../SearchBtn/SearchBtn';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
 
 type SearchFormProps = {
   onQuerySubmit: (query: string) => void;
 };
 
 export const SearchForm: FC<SearchFormProps> = ({ onQuerySubmit }) => {
-  const [searchTerm, setSearchTerm] = useState(
-    localStorage.getItem('searchQuery') || ''
-  );
+  const [searchTerm, setSearchTerm] = useLocalStorage('searchQuery', '');
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     setSearchTerm(e.target.value);
@@ -17,8 +16,9 @@ export const SearchForm: FC<SearchFormProps> = ({ onQuerySubmit }) => {
 
   const handleSearchSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
-    localStorage.setItem('searchQuery', searchTerm);
-    onQuerySubmit(searchTerm);
+    const trimmedTerm = searchTerm.trim();
+    setSearchTerm(trimmedTerm);
+    onQuerySubmit(trimmedTerm);
   };
 
   return (
