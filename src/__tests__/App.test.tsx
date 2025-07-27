@@ -160,7 +160,7 @@ test('calls API with correct parameters', () => {
   render(<App />);
 
   expect(fetchAPI).toHaveBeenCalledWith(
-    'https://rickandmortyapi.com/api/character'
+    'https://rickandmortyapi.com/api/character?page=1'
   );
 });
 

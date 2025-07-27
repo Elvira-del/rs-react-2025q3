@@ -1,9 +1,10 @@
 import { useEffect, useState, type FC } from 'react';
+import { useFilter } from './hooks/useFilter';
 import { SearchForm } from './components/search/SearchForm/SearchForm';
 import { ResultsList } from './components/results/ResultsList/ResultsList';
 import { ErrorTriggerBtn } from './components/error/ErrorTriggerBtn/ErrorTriggerBtn';
 import { Loader } from './components/loader/Loader';
-import { useFilter } from './hooks/useFilter';
+import { Pagination } from './components/pagination/Pagination';
 import './App.css';
 
 export type Character = {
@@ -25,6 +26,8 @@ const App: FC = () => {
     info: {},
     results: [],
   });
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [throwError, setThrowError] = useState(false);
   const renderData = useFilter(serverData, query);
@@ -33,10 +36,11 @@ const App: FC = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    fetch(`${serverUrl}/character`)
+    fetch(`${serverUrl}/character?page=${currentPage}`)
       .then((response) => response.json())
       .then((data) => {
         setServerData(data);
+        setTotalPages(data.info.pages);
       })
       .catch((error) => {
         console.error('Error fetching data:', error);
@@ -44,7 +48,7 @@ const App: FC = () => {
       .finally(() => {
         setIsLoading(false);
       });
-  }, []);
+  }, [currentPage]);
 
   const handleQuery = (query: string): void => {
     setQuery(query);
@@ -52,6 +56,12 @@ const App: FC = () => {
 
   const handleTriggerError = (): void => {
     setThrowError(true);
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages && page !== currentPage) {
+      setCurrentPage(page);
+    }
   };
 
   if (throwError) {
@@ -62,6 +72,11 @@ const App: FC = () => {
       <ErrorTriggerBtn onTrigger={handleTriggerError} />
       <SearchForm onQuerySubmit={handleQuery} />
       {isLoading ? <Loader /> : <ResultsList data={renderData} />}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </>
   );
 };
