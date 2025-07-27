@@ -68,7 +68,7 @@ test('correctly displays item names and descriptions', () => {
 
 test.skip('handles missing or undefined data gracefully', () => {
   expect(() => {
-    render(<ResultsList data={undefined as typeof mockCharacters} />);
+    render(<ResultsList data={mockCharacters} />);
   }).not.toThrow();
 
   const list = screen.getByRole('list');
