@@ -1,8 +1,10 @@
-import { Component, type JSX, type ReactNode } from 'react';
-import SearchForm from './components/search/SearchForm/SearchForm';
-import ResultsList from './components/results/ResultsList/ResultsList';
-import ErrorTriggerBtn from './components/error/ErrorTriggerBtn/ErrorTriggerBtn';
-import Loader from './components/loader/Loader';
+import { useEffect, useState, type FC } from 'react';
+import { useFilter } from './hooks/useFilter';
+import { SearchForm } from './components/search/SearchForm/SearchForm';
+import { ResultsList } from './components/results/ResultsList/ResultsList';
+import { ErrorTriggerBtn } from './components/error/ErrorTriggerBtn/ErrorTriggerBtn';
+import { Loader } from './components/loader/Loader';
+import { Pagination } from './components/pagination/Pagination';
 import './App.css';
 
 export type Character = {
@@ -13,84 +15,70 @@ export type Character = {
   image: string;
 };
 
-type AppState = {
-  serverUrl: string;
-  serverData: {
-    info: Record<string, unknown>;
-    results: Character[];
-  };
-  query: string;
-  renderData: Character[];
-  isLoading: boolean;
-  throwError: boolean;
+export type ServerData = {
+  info: Record<string, unknown>;
+  results: Character[];
 };
 
-class App extends Component<unknown, AppState> {
-  state = {
-    serverUrl: 'https://rickandmortyapi.com/api',
-    serverData: {
-      info: {},
-      results: [],
-    },
-    query: '',
-    renderData: [],
-    isLoading: false,
-    throwError: false,
-  };
+const App: FC = () => {
+  const [query, setQuery] = useState('');
+  const [serverData, setServerData] = useState<ServerData>({
+    info: {},
+    results: [],
+  });
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [throwError, setThrowError] = useState(false);
+  const renderData = useFilter(serverData, query);
 
-  componentDidMount(): void {
-    this.setState({ isLoading: true });
-    fetch(`${this.state.serverUrl}/character`)
+  const serverUrl = 'https://rickandmortyapi.com/api';
+
+  useEffect(() => {
+    setIsLoading(true);
+    fetch(`${serverUrl}/character?page=${currentPage}`)
       .then((response) => response.json())
       .then((data) => {
-        this.setState({
-          serverData: data,
-          renderData: data.results,
-        });
+        setServerData(data);
+        setTotalPages(data.info.pages);
       })
       .catch((error) => {
         console.error('Error fetching data:', error);
       })
       .finally(() => {
-        this.setState({ isLoading: false });
+        setIsLoading(false);
       });
-  }
+  }, [currentPage]);
 
-  componentDidUpdate(_: unknown, prevState: { query: string }): void {
-    if (prevState.query !== this.state.query) {
-      const filteredData = this.state.query
-        ? this.state.serverData.results.filter((item: Character) =>
-            item.name.toLowerCase().includes(this.state.query.toLowerCase())
-          )
-        : this.state.serverData.results;
-      this.setState({ renderData: filteredData });
-    }
-  }
-
-  handleQuery = (query: string): void => {
-    this.setState({ query });
+  const handleQuery = (query: string): void => {
+    setQuery(query);
   };
 
-  handleTriggerError = (): void => {
-    this.setState({ throwError: true });
+  const handleTriggerError = (): void => {
+    setThrowError(true);
   };
 
-  render(): JSX.Element | ReactNode {
-    if (this.state.throwError) {
-      throw new Error('Simulated error for testing ErrorBoundary');
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages && page !== currentPage) {
+      setCurrentPage(page);
     }
-    return (
-      <>
-        <ErrorTriggerBtn onTrigger={this.handleTriggerError} />
-        <SearchForm onQuerySubmit={this.handleQuery} />
-        {this.state.isLoading ? (
-          <Loader />
-        ) : (
-          <ResultsList data={this.state.renderData} />
-        )}
-      </>
-    );
+  };
+
+  if (throwError) {
+    throw new Error('Simulated error for testing ErrorBoundary');
   }
-}
+  return (
+    <>
+      <ErrorTriggerBtn onTrigger={handleTriggerError} />
+      <SearchForm onQuerySubmit={handleQuery} />
+      {isLoading ? <Loader /> : <ResultsList data={renderData} />}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
+    </>
+  );
+};
 
 export default App;
