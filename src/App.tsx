@@ -79,7 +79,7 @@ const App: FC = () => {
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
-        onPageChange={handlePageChange}
+        onPageChange={isLoading ? () => {} : handlePageChange}
       />
     </>
   );
