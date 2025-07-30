@@ -1,6 +1,14 @@
 import { render, waitFor } from '@testing-library/react';
 import { afterEach, expect, test, vi } from 'vitest';
+import { createRoutesStub } from 'react-router';
 import App from '../../App';
+
+const Stub = createRoutesStub([
+  {
+    path: '/',
+    Component: App,
+  },
+]);
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -28,7 +36,7 @@ test('renders data on successful API call', async () => {
     )
   );
 
-  const { findByText } = render(<App />);
+  const { findByText } = render(<Stub initialEntries={['/']} />);
   const character = await findByText('Rick Sanchez');
   expect(character).toBeInTheDocument();
 });
@@ -40,7 +48,7 @@ test('shows error UI on network failure', async () => {
   );
   const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-  render(<App />);
+  render(<Stub initialEntries={['/']} />);
 
   await waitFor(() => {
     expect(errorSpy).toHaveBeenCalledWith(
