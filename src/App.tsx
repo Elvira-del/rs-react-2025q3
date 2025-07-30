@@ -6,6 +6,7 @@ import { ErrorTriggerBtn } from './components/error/ErrorTriggerBtn/ErrorTrigger
 import { Loader } from './components/loader/Loader';
 import { Pagination } from './components/pagination/Pagination';
 import './App.css';
+import { Outlet } from 'react-router';
 
 export type Character = {
   id: number;
@@ -68,20 +69,26 @@ const App: FC = () => {
     }
   };
 
+  console.log('Data from API:', serverData.results);
+
   if (throwError) {
     throw new Error('Simulated error for testing ErrorBoundary');
   }
   return (
-    <>
-      <ErrorTriggerBtn onTrigger={handleTriggerError} />
-      <SearchForm onQuerySubmit={handleQuery} />
-      {isLoading ? <Loader /> : <ResultsList data={renderData} />}
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={isLoading ? () => {} : handlePageChange}
-      />
-    </>
+    <main>
+      <section>
+        <ErrorTriggerBtn onTrigger={handleTriggerError} />
+        <SearchForm onQuerySubmit={handleQuery} />
+        {isLoading ? <Loader /> : <ResultsList data={renderData} />}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={isLoading ? () => {} : handlePageChange}
+        />
+
+        <Outlet />
+      </section>
+    </main>
   );
 };
 
