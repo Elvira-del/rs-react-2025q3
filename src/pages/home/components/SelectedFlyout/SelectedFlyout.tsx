@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import { useStore } from '../../../../app/store';
+import { downloadCSV } from '../../../../utils/downloadCSV';
 
 export const SelectedFlyout: FC = () => {
   const selectedItems = useStore((state) => state.selectedItems);
@@ -24,6 +25,7 @@ export const SelectedFlyout: FC = () => {
         <button
           className="rounded-xl bg-white px-4 py-2 font-medium text-indigo-600 shadow hover:bg-indigo-100"
           type="button"
+          onClick={() => downloadCSV(selectedItems)}
         >
           Download
         </button>

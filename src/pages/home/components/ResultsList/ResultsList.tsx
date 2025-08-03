@@ -21,8 +21,6 @@ export const ResultsList: FC<ResultsListProps> = ({ data }) => {
     }
   };
 
-  console.log('Selected items:', selectedItems);
-
   return (
     <ul className="mx-auto mt-6 flex w-full max-w-md flex-col gap-4">
       {data.map((character) => (
@@ -33,7 +31,9 @@ export const ResultsList: FC<ResultsListProps> = ({ data }) => {
         >
           <input
             type="checkbox"
-            checked={selectedItems.some((item) => item.id === character.id)}
+            checked={selectedItems.some(
+              (item: Character) => item.id === character.id
+            )}
             onClick={(e) => e.stopPropagation()}
             onChange={(e) => handleSelectItem(character, e.target.checked)}
             className="mr-4 h-5 w-5 shrink-0 accent-indigo-500"
