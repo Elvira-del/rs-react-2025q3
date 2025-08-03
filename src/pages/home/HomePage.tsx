@@ -5,6 +5,7 @@ import { SearchForm } from '../../components/search/SearchForm/SearchForm';
 import { useFilter } from '../../hooks/useFilter';
 import { Loader } from '../../components/loader/Loader';
 import { ResultsList } from './components/ResultsList/ResultsList';
+import { SelectedFlyout } from './components/SelectedFlyout/SelectedFlyout';
 
 export type Character = {
   id: number;
@@ -74,6 +75,7 @@ export const HomePage: FC = () => {
       />
 
       <Outlet />
+      <SelectedFlyout />
     </>
   );
 };

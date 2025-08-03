@@ -8,4 +8,5 @@ export const useStore = create((set) => ({
         ? state.selectedItems
         : [...state.selectedItems, item],
     })),
+  removeAllSelectedItems: () => set({ selectedItems: [] }),
 }));
