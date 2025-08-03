@@ -1,6 +1,7 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import ResultsList from '../ResultsList';
+import { ResultsList } from '../ResultsList';
+import { createRoutesStub } from 'react-router';
 
 const mockCharacters = [
   {
@@ -31,7 +32,14 @@ beforeEach(() => {
 });
 
 test('renders correct number of items when data is provided', () => {
-  const { getAllByRole } = render(<ResultsList data={mockCharacters} />);
+  const Stub = createRoutesStub([
+    {
+      path: '/',
+      Component: () => <ResultsList data={mockCharacters} />,
+    },
+  ]);
+
+  const { getAllByRole } = render(<Stub />);
 
   const listItems = getAllByRole('listitem');
 
@@ -48,7 +56,14 @@ test.skip('displays `no results` message when data array is empty', () => {
 });
 
 test('correctly displays item names and descriptions', () => {
-  const { getAllByRole } = render(<ResultsList data={mockCharacters} />);
+  const Stub = createRoutesStub([
+    {
+      path: '/',
+      Component: () => <ResultsList data={mockCharacters} />,
+    },
+  ]);
+
+  const { getAllByRole } = render(<Stub />);
 
   const listItems = getAllByRole('listitem');
 
@@ -68,7 +83,7 @@ test('correctly displays item names and descriptions', () => {
 
 test.skip('handles missing or undefined data gracefully', () => {
   expect(() => {
-    render(<ResultsList data={undefined as typeof mockCharacters} />);
+    render(<ResultsList data={mockCharacters} />);
   }).not.toThrow();
 
   const list = screen.getByRole('list');

@@ -1,14 +1,30 @@
 import { expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
 import userEvent from '@testing-library/user-event';
-import ErrorTriggerBtn from '../ErrorTriggerBtn/ErrorTriggerBtn';
-import FallbackUI from '../FallbackUI/FallbackUI';
+import { createRoutesStub } from 'react-router';
+import { ErrorTriggerBtn } from '../ErrorTriggerBtn/ErrorTriggerBtn';
+import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
+import { FallbackUI } from '../FallbackUI/FallbackUI';
 import App from '../../../App';
+import { HomePage } from '../../../pages/home/HomePage';
 
 const TestError = vi.fn(() => {
   throw new Error('Test error');
 });
+
+const Stub = createRoutesStub([
+  {
+    path: '/',
+    Component: App,
+    ErrorBoundary: FallbackUI,
+    children: [
+      {
+        Component: HomePage,
+        children: [{ index: true }],
+      },
+    ],
+  },
+]);
 
 test('catches and handles JavaScript errors in child components', async () => {
   expect(() =>
@@ -22,12 +38,14 @@ test('catches and handles JavaScript errors in child components', async () => {
 
 test('displays fallback UI when error occurs', async () => {
   render(
-    <ErrorBoundary fallback={<p>Oops, something went wrong</p>}>
+    <ErrorBoundary fallback={<div>Something broke in the multiverse</div>}>
       <TestError />
     </ErrorBoundary>
   );
 
-  const errorText = await screen.findByText('Oops, something went wrong');
+  const errorText = await screen.findByText(
+    /something broke in the multiverse/i
+  );
   expect(errorText).toBeInTheDocument();
 });
 
@@ -62,7 +80,7 @@ test('triggers error boundary fallback UI', async () => {
 
   const { getByRole, findByText } = render(
     <ErrorBoundary fallback={<FallbackUI />}>
-      <App />
+      <Stub initialEntries={['/']} />
     </ErrorBoundary>
   );
 
@@ -77,17 +95,15 @@ test('displays fallback UI when error is triggered by parent', async () => {
   const user = userEvent.setup();
   const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-  const { getByRole } = render(
-    <ErrorBoundary fallback={<div>Oops, something went wrong</div>}>
-      <App />
-    </ErrorBoundary>
-  );
+  const { getByRole } = render(<Stub initialEntries={['/']} />);
 
   const errorBtn = getByRole('button', { name: /simulate error/i });
 
   await user.click(errorBtn);
 
-  const fallback = await screen.findByText(/oops, something went wrong/i);
+  const fallback = await screen.findByText(
+    /something broke in the multiverse/i
+  );
   expect(fallback).toBeInTheDocument();
 
   expect(errorSpy).toHaveBeenCalled();

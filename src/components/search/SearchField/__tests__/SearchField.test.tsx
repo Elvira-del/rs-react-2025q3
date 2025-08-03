@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import { expect, test } from 'vitest';
-import SearchField from '../SearchField';
+import { SearchField } from '../SearchField';
 
 test('renders search input', () => {
   const { getByRole } = render(
