@@ -2,11 +2,18 @@ import { render, waitFor } from '@testing-library/react';
 import { afterEach, expect, test, vi } from 'vitest';
 import { createRoutesStub } from 'react-router';
 import App from '../../App';
+import { HomePage } from '../../pages/home/HomePage';
 
 const Stub = createRoutesStub([
   {
     path: '/',
     Component: App,
+    children: [
+      {
+        Component: HomePage,
+        children: [{ index: true }],
+      },
+    ],
   },
 ]);
 

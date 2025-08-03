@@ -2,6 +2,7 @@ import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { createRoutesStub } from 'react-router';
+import { HomePage } from '../pages/home/HomePage';
 import App from '../App';
 
 const mockCharacter = [
@@ -28,6 +29,12 @@ const Stub = createRoutesStub([
   {
     path: '/',
     Component: App,
+    children: [
+      {
+        Component: HomePage,
+        children: [{ index: true }],
+      },
+    ],
   },
 ]);
 

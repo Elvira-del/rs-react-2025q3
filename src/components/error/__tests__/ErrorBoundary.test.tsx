@@ -6,6 +6,7 @@ import { ErrorTriggerBtn } from '../ErrorTriggerBtn/ErrorTriggerBtn';
 import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
 import { FallbackUI } from '../FallbackUI/FallbackUI';
 import App from '../../../App';
+import { HomePage } from '../../../pages/home/HomePage';
 
 const TestError = vi.fn(() => {
   throw new Error('Test error');
@@ -16,6 +17,12 @@ const Stub = createRoutesStub([
     path: '/',
     Component: App,
     ErrorBoundary: FallbackUI,
+    children: [
+      {
+        Component: HomePage,
+        children: [{ index: true }],
+      },
+    ],
   },
 ]);
 
