@@ -1,10 +1,13 @@
 import type { FC } from 'react';
 import { useStore } from '../../../../app/store';
 import { downloadCSV } from '../../../../utils/downloadCSV';
+import type { Character } from '../../HomePage';
 
 export const SelectedFlyout: FC = () => {
-  const selectedItems = useStore((state) => state.selectedItems);
-  const onRemoveItems = useStore((state) => state.removeAllSelectedItems);
+  const selectedItems: Character[] = useStore((state) => state.selectedItems);
+  const onRemoveItems: () => void = useStore(
+    (state) => state.removeAllSelectedItems
+  );
 
   if (selectedItems.length === 0) return null;
 

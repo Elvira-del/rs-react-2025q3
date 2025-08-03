@@ -1,8 +1,20 @@
 import { describe, expect, beforeEach, test } from 'vitest';
 import { useStore } from '../store';
 
-const exampleChar = { id: 1, name: 'Rick', species: 'Human', status: 'Alive' };
-const anotherChar = { id: 2, name: 'Morty', species: 'Human', status: 'Alive' };
+const exampleChar = {
+  id: 1,
+  name: 'Rick',
+  species: 'Human',
+  status: 'Alive',
+  image: '',
+};
+const anotherChar = {
+  id: 2,
+  name: 'Morty',
+  species: 'Human',
+  status: 'Alive',
+  image: '',
+};
 
 describe('useStore', () => {
   beforeEach(() => {

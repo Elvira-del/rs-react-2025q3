@@ -1,4 +1,8 @@
-import { createBrowserRouter, RouterProvider } from 'react-router';
+import {
+  createBrowserRouter,
+  RouterProvider,
+  type LoaderFunctionArgs,
+} from 'react-router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import ErrorBoundary from './components/error/ErrorBoundary/ErrorBoundary.tsx';
@@ -9,7 +13,9 @@ import { HomePage, type Character } from './pages/home/HomePage.tsx';
 import App from './App.tsx';
 import './index.css';
 
-export async function detailsLoader({ params }): Promise<Character | null> {
+export async function detailsLoader({
+  params,
+}: LoaderFunctionArgs): Promise<Character | null> {
   if (!params.detailsId) return null;
   const res = await fetch(
     `https://rickandmortyapi.com/api/character/${params.detailsId}`

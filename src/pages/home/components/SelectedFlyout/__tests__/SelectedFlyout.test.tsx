@@ -18,8 +18,8 @@ describe('Flyout', () => {
   test('shows correct count when items are selected', () => {
     useStore.setState({
       selectedItems: [
-        { id: 1, name: 'Rick' },
-        { id: 2, name: 'Morty' },
+        { id: 1, name: 'Rick', status: 'Alive', species: 'Human', image: '' },
+        { id: 2, name: 'Morty', status: 'Alive', species: 'Human', image: '' },
       ],
     });
     const { getByText } = render(<SelectedFlyout />);
@@ -30,7 +30,9 @@ describe('Flyout', () => {
     const user = userEvent.setup();
     const removeAllSelectedItems = vi.fn();
     useStore.setState({
-      selectedItems: [{ id: 1, name: 'Rick' }],
+      selectedItems: [
+        { id: 1, name: 'Rick', status: 'Alive', species: 'Human', image: '' },
+      ],
       removeAllSelectedItems,
     });
     const { getByRole } = render(<SelectedFlyout />);

@@ -1,9 +1,9 @@
 import type { Character } from '../pages/home/HomePage';
 
-export function downloadCSV(items) {
+export function downloadCSV(items: Character[]): void {
   if (items.length === 0) return;
   const headers = ['Name', 'Status', 'Species', 'URL'];
-  const rows = items.map((item: Character) => [
+  const rows = items.map((item) => [
     `"${item.name}"`,
     `"${item.status}"`,
     `"${item.species}"`,

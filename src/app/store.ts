@@ -1,7 +1,14 @@
 import { create } from 'zustand';
 import type { Character } from '../pages/home/HomePage';
 
-export const useStore = create((set) => ({
+export type StoreState = {
+  selectedItems: Character[];
+  addNewSelectedItems: (item: Character) => void;
+  removeSelectedItem: (id: number | string) => void;
+  removeAllSelectedItems: () => void;
+};
+
+export const useStore = create<StoreState>((set) => ({
   selectedItems: [],
   addNewSelectedItems: (item: Character) =>
     set((state) => ({
