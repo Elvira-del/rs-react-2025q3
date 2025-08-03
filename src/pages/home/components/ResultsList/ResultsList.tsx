@@ -10,11 +10,14 @@ type ResultsListProps = {
 export const ResultsList: FC<ResultsListProps> = ({ data }) => {
   const selectedItems = useStore((state) => state.selectedItems);
   const onSelectItem = useStore((state) => state.addNewSelectedItems);
+  const onDeselectItem = useStore((state) => state.removeSelectedItem);
   const navigate = useNavigate();
 
   const handleSelectItem = (character: Character, checked: boolean) => {
     if (checked) {
       onSelectItem(character);
+    } else {
+      onDeselectItem(character.id);
     }
   };
 
