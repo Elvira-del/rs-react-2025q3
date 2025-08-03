@@ -1,94 +1,55 @@
-import { useEffect, useState, type FC } from 'react';
-import { useFilter } from './hooks/useFilter';
-import { SearchForm } from './components/search/SearchForm/SearchForm';
-import { ResultsList } from './components/results/ResultsList/ResultsList';
+import { useState, type FC } from 'react';
+import { NavLink, Outlet } from 'react-router';
 import { ErrorTriggerBtn } from './components/error/ErrorTriggerBtn/ErrorTriggerBtn';
-import { Loader } from './components/loader/Loader';
-import { Pagination } from './components/pagination/Pagination';
 import './App.css';
-import { Outlet } from 'react-router';
-
-export type Character = {
-  id: number;
-  name: string;
-  status: string;
-  species: string;
-  image: string;
-};
-
-export type ServerData = {
-  info: Record<string, unknown>;
-  results: Character[];
-};
 
 const App: FC = () => {
-  const [query, setQuery] = useState('');
-  const [serverData, setServerData] = useState<ServerData>({
-    info: {},
-    results: [],
-  });
-  const [totalPages, setTotalPages] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
   const [throwError, setThrowError] = useState(false);
-  const renderData = useFilter(serverData, query);
-
-  const serverUrl = 'https://rickandmortyapi.com/api';
-
-  useEffect(() => {
-    setIsLoading(true);
-    fetch(`${serverUrl}/character?page=${currentPage}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setServerData(data);
-        setTotalPages(data.info.pages);
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [currentPage]);
-
-  const handleQuery = (query: string): void => {
-    setQuery(query);
-  };
 
   const handleTriggerError = (): void => {
     setThrowError(true);
   };
 
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages && page !== currentPage) {
-      setCurrentPage(page);
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
-    }
-  };
-
-  console.log('Data from API:', serverData.results);
-
   if (throwError) {
     throw new Error('Simulated error for testing ErrorBoundary');
   }
   return (
-    <main>
-      <section>
+    <>
+      <header className="mb-10 pt-6">
+        <nav>
+          <ul className="flex justify-center gap-6">
+            <li>
+              <NavLink
+                className={({ isActive, isPending }) =>
+                  `rounded-xl px-5 py-2 font-medium shadow-sm transition focus:ring-2 focus:ring-indigo-200 focus:outline-none ${isActive ? 'border border-indigo-500 bg-indigo-500 text-white shadow' : 'border border-indigo-200 bg-white/90 text-indigo-600 hover:border-indigo-400 hover:bg-indigo-50'} ${isPending ? 'pointer-events-none opacity-60' : ''}`
+                }
+                to="/"
+              >
+                Home
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                className={({ isActive, isPending }) =>
+                  `rounded-xl px-5 py-2 font-medium shadow-sm transition focus:ring-2 focus:ring-indigo-200 focus:outline-none ${isActive ? 'border border-indigo-500 bg-indigo-500 text-white shadow' : 'border border-indigo-200 bg-white/90 text-indigo-600 hover:border-indigo-400 hover:bg-indigo-50'} ${isPending ? 'pointer-events-none opacity-60' : ''}`
+                }
+                to="about"
+              >
+                About
+              </NavLink>
+            </li>
+          </ul>
+        </nav>
+      </header>
+      <main>
+        <section>
+          <Outlet />
+        </section>
+      </main>
+      <footer>
         <ErrorTriggerBtn onTrigger={handleTriggerError} />
-        <SearchForm onQuerySubmit={handleQuery} />
-        {isLoading ? <Loader /> : <ResultsList data={renderData} />}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={isLoading ? () => {} : handlePageChange}
-        />
-
-        <Outlet />
-      </section>
-    </main>
+      </footer>
+    </>
   );
 };
 
