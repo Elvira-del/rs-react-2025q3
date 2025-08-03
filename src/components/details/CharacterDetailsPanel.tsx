@@ -11,6 +11,7 @@ export const CharacterDetailsPanel: FC = () => {
     <div
       className="fixed inset-0 z-40 flex justify-end bg-black/30 transition-colors"
       onClick={() => navigate('/')}
+      role="dialog"
       aria-modal="true"
       tabIndex={-1}
     >
