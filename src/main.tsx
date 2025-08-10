@@ -7,7 +7,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import ErrorBoundary from './components/error/ErrorBoundary/ErrorBoundary.tsx';
 import { FallbackUI } from './components/error/FallbackUI/FallbackUI.tsx';
-import { CharacterDetailsPanel } from './components/details/CharacterDetailsPanel.tsx';
+import { CharacterDetailsPanel } from './pages/home/components/CharacterDetailsPanel/CharacterDetailsPanel.tsx';
 import { AboutPage } from './pages/about/AboutPage.tsx';
 import { HomePage, type Character } from './pages/home/HomePage.tsx';
 import App from './App.tsx';

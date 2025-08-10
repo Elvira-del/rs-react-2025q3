@@ -1,7 +1,7 @@
 import { type ChangeEvent, type FC, type FormEvent } from 'react';
 import { SearchField } from '../SearchField/SearchField';
 import { SearchBtn } from '../SearchBtn/SearchBtn';
-import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { useLocalStorage } from '../../../../hooks/useLocalStorage';
 
 type SearchFormProps = {
   onQuerySubmit: (query: string) => void;
