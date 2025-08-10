@@ -20,7 +20,8 @@ vi.mock('react-router', async () => {
 beforeEach(() => {
   vi.clearAllMocks();
 });
-describe("Character's details", () => {
+
+describe("Character's details tests", () => {
   test('renders nothing if character is null', () => {
     mockedUseLoaderData.mockReturnValue(null);
 

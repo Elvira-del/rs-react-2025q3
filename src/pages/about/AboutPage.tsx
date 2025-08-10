@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { Summary } from './components/summary/Summary';
+import { Summary } from './components/Summary/Summary';
 
 export const AboutPage: FC = () => {
   return (

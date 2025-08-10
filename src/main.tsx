@@ -37,7 +37,7 @@ export const router = createBrowserRouter(
         {
           Component: HomePage,
           children: [
-            { index: true },
+            { index: true, Component: () => null },
             {
               path: ':detailsId',
               loader: detailsLoader,

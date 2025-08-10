@@ -3,7 +3,7 @@ import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Pagination } from '../Pagination';
 
-describe('Pagination', () => {
+describe("Pagination's tests", () => {
   test('does not render if totalPages <= 1', () => {
     const { container } = render(
       <Pagination currentPage={2} totalPages={1} onPageChange={vi.fn()} />

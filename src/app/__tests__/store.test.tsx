@@ -16,11 +16,11 @@ const anotherChar = {
   image: '',
 };
 
-describe('useStore', () => {
-  beforeEach(() => {
-    useStore.setState({ selectedItems: [] });
-  });
+beforeEach(() => {
+  useStore.setState({ selectedItems: [] });
+});
 
+describe('useStore tests', () => {
   test('adds a new selected item', () => {
     useStore.getState().addNewSelectedItems(exampleChar);
     expect(useStore.getState().selectedItems).toHaveLength(1);

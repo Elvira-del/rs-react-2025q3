@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createRoutesStub } from 'react-router';
 import { ErrorTriggerBtn } from '../ErrorTriggerBtn/ErrorTriggerBtn';
@@ -8,7 +8,7 @@ import { FallbackUI } from '../FallbackUI/FallbackUI';
 import App from '../../../App';
 import { HomePage } from '../../../pages/home/HomePage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { FC, PropsWithChildren, ReactNode } from 'react';
+import type { PropsWithChildren } from 'react';
 
 const TestError = vi.fn(() => {
   throw new Error('Test error');
@@ -22,18 +22,20 @@ const Stub = createRoutesStub([
     children: [
       {
         Component: HomePage,
-        children: [{ index: true }],
+        children: [{ index: true, Component: () => null }],
       },
     ],
   },
 ]);
 
-const queryClient = new QueryClient();
-const Wrapper: FC<PropsWithChildren<ReactNode>> = ({ children }) => (
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+});
+const Wrapper = ({ children }: PropsWithChildren) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-describe('Error boundary', () => {
+describe('Error boundary tests', () => {
   test('catches and handles JavaScript errors in child components', async () => {
     expect(() =>
       render(
@@ -45,15 +47,13 @@ describe('Error boundary', () => {
   });
 
   test('displays fallback UI when error occurs', async () => {
-    render(
+    const { findByText } = render(
       <ErrorBoundary fallback={<div>Something broke in the multiverse</div>}>
         <TestError />
       </ErrorBoundary>
     );
 
-    const errorText = await screen.findByText(
-      /something broke in the multiverse/i
-    );
+    const errorText = await findByText(/something broke in the multiverse/i);
     expect(errorText).toBeInTheDocument();
   });
 
@@ -105,7 +105,7 @@ describe('Error boundary', () => {
     const user = userEvent.setup();
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    const { getByRole } = render(
+    const { getByRole, findByText } = render(
       <Wrapper>
         <Stub initialEntries={['/']} />
       </Wrapper>
@@ -115,9 +115,7 @@ describe('Error boundary', () => {
 
     await user.click(errorBtn);
 
-    const fallback = await screen.findByText(
-      /something broke in the multiverse/i
-    );
+    const fallback = await findByText(/something broke in the multiverse/i);
     expect(fallback).toBeInTheDocument();
 
     expect(errorSpy).toHaveBeenCalled();

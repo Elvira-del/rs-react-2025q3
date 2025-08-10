@@ -7,6 +7,7 @@ import { SearchForm } from './components/SearchForm/SearchForm';
 import { Loader } from '../../components/loader/Loader';
 import { ResultsList } from './components/ResultsList/ResultsList';
 import { SelectedFlyout } from './components/SelectedFlyout/SelectedFlyout';
+import { fetchCharacters } from '../../api/api';
 
 export type Character = {
   id: number;
@@ -19,15 +20,6 @@ export type Character = {
 export type ServerData = {
   info: Record<string, unknown>;
   results: Character[];
-};
-
-const fetchCharacters = async (page: number) => {
-  const url = new URL('https://rickandmortyapi.com/api/character/');
-  url.searchParams.append('page', page.toString());
-
-  const response = await fetch(url.toString());
-  if (!response.ok) throw new Error('Network response was not ok');
-  return response.json();
 };
 
 export const HomePage: FC = () => {
@@ -64,9 +56,8 @@ export const HomePage: FC = () => {
   return (
     <>
       <SearchForm onQuerySubmit={handleQuery} />
-      {isLoading ? (
-        <Loader />
-      ) : (
+      {isLoading && <Loader />}
+      {!isLoading && filteredData.length && (
         <>
           <ResultsList data={filteredData} />
           <Pagination

@@ -1,7 +1,10 @@
-import { beforeEach, expect, test, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { render } from '@testing-library/react';
 import { ResultsList } from '../ResultsList';
 import { createRoutesStub } from 'react-router';
+import { ResultsItem } from '../../ResultsItem/ResultsItem';
+import type { PropsWithChildren } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const mockCharacters = [
   {
@@ -31,87 +34,112 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-test('renders correct number of items when data is provided', () => {
-  const Stub = createRoutesStub([
-    {
-      path: '/',
-      Component: () => <ResultsList data={mockCharacters} />,
-    },
-  ]);
-
-  const { getAllByRole } = render(<Stub />);
-
-  const listItems = getAllByRole('listitem');
-
-  expect(listItems).toHaveLength(mockCharacters.length);
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
 });
+const Wrapper = ({ children }: PropsWithChildren) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
 
-// KNOWN LIMITATION: ResultsList component does not handle empty data array.
-// Test temporarily skipped before component correction.
+describe('Results list tests', () => {
+  test('renders correct number of items when data is provided', () => {
+    const Stub = createRoutesStub([
+      {
+        path: '/',
+        Component: () => <ResultsList data={mockCharacters} />,
+      },
+    ]);
 
-test.skip('displays `no results` message when data array is empty', () => {
-  const { getByText } = render(<ResultsList data={[]} />);
+    const { getAllByRole } = render(<Stub />);
 
-  expect(getByText('No results found')).toBeInTheDocument();
-});
+    const listItems = getAllByRole('listitem');
 
-test('correctly displays item names and descriptions', () => {
-  const Stub = createRoutesStub([
-    {
-      path: '/',
-      Component: () => <ResultsList data={mockCharacters} />,
-    },
-  ]);
+    expect(listItems).toHaveLength(mockCharacters.length);
+  });
 
-  const { getAllByRole } = render(<Stub />);
+  test.skip('displays `no results` message when data array is empty', () => {
+    const Stub = createRoutesStub([
+      {
+        path: '/',
+        Component: () => <ResultsList data={[]} />,
+      },
+    ]);
+    const { getByText } = render(
+      <Wrapper>
+        <Stub initialEntries={['/']} />
+      </Wrapper>
+    );
 
-  const listItems = getAllByRole('listitem');
+    expect(getByText(/no results found/i)).toBeInTheDocument();
+  });
 
-  const names = listItems.map((item) => item.querySelector('h2')?.textContent);
-  const statuses = listItems.map(
-    (item) => item.querySelector('p')?.textContent
-  );
+  test('correctly displays item names and descriptions', () => {
+    const Stub = createRoutesStub([
+      {
+        path: '/',
+        Component: () => <ResultsList data={mockCharacters} />,
+      },
+    ]);
 
-  expect(names).toEqual(mockCharacters.map((char) => char.name));
-  expect(statuses).toEqual(
-    mockCharacters.map((char) => `Status: ${char.status}`)
-  );
-});
+    const { getAllByRole } = render(<Stub />);
 
-// KNOWN LIMITATION: ResultsList component failed with data === undefined.
-// Test temporarily skipped before component correction.
+    const listItems = getAllByRole('listitem');
 
-test.skip('handles missing or undefined data gracefully', () => {
-  expect(() => {
-    render(<ResultsList data={mockCharacters} />);
-  }).not.toThrow();
+    const names = listItems.map(
+      (item) => item.querySelector('h2')?.textContent
+    );
+    const statuses = listItems.map(
+      (item) => item.querySelector('p')?.textContent
+    );
 
-  const list = screen.getByRole('list');
-  const listItem = list.querySelectorAll('li');
+    expect(names).toEqual(mockCharacters.map((char) => char.name));
+    expect(statuses).toEqual(
+      mockCharacters.map((char) => `Status: ${char.status}`)
+    );
+  });
 
-  expect(listItem).toHaveLength(0);
-});
+  test('handles missing or undefined data gracefully', () => {
+    const Stub = createRoutesStub([
+      {
+        path: '/',
+        Component: () => <ResultsList data={[]} />,
+      },
+    ]);
 
-// KNOWN LIMITATION: ResultsItem doesn't exist yet, and will be implemented later.
-// Test temporarily skipped before component implementation.
+    const { getByRole } = render(
+      <Wrapper>
+        <Stub />
+      </Wrapper>
+    );
 
-test.skip('displays item name and description correctly', () => {
-  // const { getByTestId } = render(<ResultsItem data={mockCharacters} />);
+    const list = getByRole('list');
+    const listItem = list.querySelectorAll('li');
 
-  const name = screen.getByTestId('character-name');
-  const status = screen.getByTestId('character-status');
-  const species = screen.getByTestId('character-species');
+    expect(listItem).toHaveLength(0);
+  });
 
-  expect(name).toHaveTextContent(mockCharacters[0].name);
-  expect(status).toHaveTextContent(`Status: ${mockCharacters[0].status}`);
-  expect(species).toHaveTextContent(`Species: ${mockCharacters[0].species}`);
-});
+  test('displays item name and description correctly', () => {
+    const mockCharacter = {
+      id: 1,
+      name: 'Rick Sanchez',
+      status: 'Alive',
+      species: 'Human',
+      image: 'https://rickandmortyapi.com/api/character/avatar/1.jpeg',
+    };
+    const Stub = createRoutesStub([
+      {
+        path: '/',
+        Component: () => <ResultsItem character={mockCharacter} />,
+      },
+    ]);
+    const { getByTestId } = render(<Stub />);
 
-test.skip('handles missing props gracefully', () => {
-  // expect(() => {
-  //   render(<ResultsItem data={[]} />);
-  // }).not.toThrow();
+    const name = getByTestId('character-name');
+    const status = getByTestId('character-status');
+    const species = getByTestId('character-species');
 
-  const resultsItem = screen.getByRole('listitem');
-  expect(resultsItem).not.toBeInTheDocument();
+    expect(name).toHaveTextContent(mockCharacter.name);
+    expect(status).toHaveTextContent(mockCharacter.status);
+    expect(species).toHaveTextContent(mockCharacter.species);
+  });
 });

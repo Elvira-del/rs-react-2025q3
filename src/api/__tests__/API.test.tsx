@@ -1,12 +1,13 @@
-import { render, waitFor } from '@testing-library/react';
+import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { createRoutesStub } from 'react-router';
 import App from '../../App';
 import { HomePage } from '../../pages/home/HomePage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { FC, PropsWithChildren, ReactNode } from 'react';
+import type { PropsWithChildren } from 'react';
 
 afterEach(() => {
+  cleanup();
   vi.unstubAllGlobals();
 });
 
@@ -17,14 +18,16 @@ const Stub = createRoutesStub([
     children: [
       {
         Component: HomePage,
-        children: [{ index: true }],
+        children: [{ index: true, Component: () => null }],
       },
     ],
   },
 ]);
 
-const queryClient = new QueryClient();
-const Wrapper: FC<PropsWithChildren<ReactNode>> = ({ children }) => (
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+});
+const Wrapper = ({ children }: PropsWithChildren) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
@@ -35,7 +38,7 @@ describe('API tests', () => {
       vi.fn(() =>
         Promise.resolve({
           ok: true,
-          json: () =>
+          json: async () =>
             Promise.resolve({
               results: [
                 {
@@ -43,7 +46,8 @@ describe('API tests', () => {
                   name: 'Rick Sanchez',
                   status: 'Alive',
                   species: 'Human',
-                  image: '',
+                  image:
+                    'https://rickandmortyapi.com/api/character/avatar/1.jpeg',
                 },
               ],
             }),
@@ -51,35 +55,28 @@ describe('API tests', () => {
       )
     );
 
-    const { findByText } = render(
+    const { findByRole } = render(
       <Wrapper>
         <Stub initialEntries={['/']} />
       </Wrapper>
     );
-    const character = await findByText('Rick Sanchez');
+    const character = await findByRole('heading', { name: /rick sanchez/i });
     expect(character).toBeInTheDocument();
   });
 
   test('shows error UI on network failure', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn(() => Promise.reject(new Error('Network error')))
+      vi.fn().mockRejectedValue(new Error('Network error'))
     );
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    render(
+    const { findByText } = render(
       <Wrapper>
         <Stub initialEntries={['/']} />
       </Wrapper>
     );
 
-    await waitFor(() => {
-      expect(errorSpy).toHaveBeenCalledWith(
-        'Error fetching data:',
-        expect.any(Error)
-      );
-    });
-
-    errorSpy.mockRestore();
+    const message = await findByText(/error|failed|try again/i);
+    expect(message).toBeInTheDocument();
   });
 });
