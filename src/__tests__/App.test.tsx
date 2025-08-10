@@ -1,9 +1,11 @@
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createRoutesStub } from 'react-router';
 import { HomePage } from '../pages/home/HomePage';
 import App from '../App';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { FC, PropsWithChildren, ReactNode } from 'react';
 
 const mockCharacter = [
   {
@@ -38,240 +40,283 @@ const Stub = createRoutesStub([
   },
 ]);
 
-test('shows loading state while fetching data', () => {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(() => new Promise(() => {}))
-  );
+const queryClient = new QueryClient();
+const Wrapper: FC<PropsWithChildren<ReactNode>> = ({ children }) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
 
-  const { getByText } = render(<Stub initialEntries={['/']} />);
+describe('Home page', () => {
+  test('shows loading state while fetching data', () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => new Promise(() => {}))
+    );
 
-  expect(getByText(/loading/i)).toBeInTheDocument();
-});
+    const { getByText } = render(
+      <Wrapper>
+        <Stub initialEntries={['/']} />
+      </Wrapper>
+    );
 
-// KNOWN LIMITATION: These tests temporarily skipped before component correction
+    expect(getByText(/loading/i)).toBeInTheDocument();
+  });
 
-test.skip('displays error message when API call fails', async () => {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(() => Promise.reject(new Error('Network error')))
-  );
+  // KNOWN LIMITATION: These tests temporarily skipped before component correction
 
-  const { findByText } = render(<App />);
+  test.skip('displays error message when API call fails', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.reject(new Error('Network error')))
+    );
 
-  await expect(findByText(/sorry, we have network error/i)).toBeInTheDocument();
-});
+    const { findByText } = render(<App />);
 
-test.skip('shows appropriate error for different HTTP status codes (4xx, 5xx)', () => {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(() =>
-      Promise.resolve({
-        ok: false,
-        status: 404,
-        statusText: 'Not Found',
-      })
-    )
-  );
+    await expect(
+      findByText(/sorry, we have network error/i)
+    ).toBeInTheDocument();
+  });
 
-  const { getByText } = render(<App />);
+  test.skip('shows appropriate error for different HTTP status codes (4xx, 5xx)', () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() =>
+        Promise.resolve({
+          ok: false,
+          status: 404,
+          statusText: 'Not Found',
+        })
+      )
+    );
 
-  expect(getByText(/not found/i)).toBeInTheDocument();
-});
+    const { getByText } = render(<App />);
 
-test('shows/hides based on loading prop', async () => {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ results: [] }),
-      })
-    )
-  );
+    expect(getByText(/not found/i)).toBeInTheDocument();
+  });
 
-  const { getByText, queryByText } = render(<Stub initialEntries={['/']} />);
+  test('shows/hides based on loading prop', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ results: [] }),
+        })
+      )
+    );
 
-  expect(getByText(/loading/i)).toBeInTheDocument();
+    const { getByText, queryByText } = render(
+      <Wrapper>
+        <Stub initialEntries={['/']} />
+      </Wrapper>
+    );
 
-  await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(getByText(/loading/i)).toBeInTheDocument();
 
-  expect(queryByText(/loading/i)).not.toBeInTheDocument();
-});
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
-test('makes initial API call on component mount', async () => {
-  const fetchAPI = vi.fn(() =>
-    Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve({ results: mockCharacter }),
-    })
-  );
-  vi.stubGlobal('fetch', fetchAPI);
+    expect(queryByText(/loading/i)).not.toBeInTheDocument();
+  });
 
-  render(<Stub initialEntries={['/']} />);
-
-  expect(fetchAPI).toHaveBeenCalledOnce();
-});
-
-test('handles search term from localStorage on initial load', () => {
-  localStorage.setItem('searchQuery', 'Rick');
-
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(() =>
+  test('makes initial API call on component mount', async () => {
+    const fetchAPI = vi.fn(() =>
       Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({ results: [] }),
+        json: () => Promise.resolve({ results: mockCharacter }),
       })
-    )
-  );
+    );
+    vi.stubGlobal('fetch', fetchAPI);
 
-  const { getByRole } = render(<Stub initialEntries={['/']} />);
+    render(<Stub initialEntries={['/']} />);
 
-  expect(getByRole('searchbox')).toHaveValue('Rick');
-});
+    expect(fetchAPI).toHaveBeenCalledOnce();
+  });
 
-test('manages loading states during API calls', async () => {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(() =>
+  test('handles search term from localStorage on initial load', () => {
+    localStorage.setItem('searchQuery', 'Rick');
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ results: [] }),
+        })
+      )
+    );
+
+    const { getByRole } = render(
+      <Wrapper>
+        <Stub initialEntries={['/']} />
+      </Wrapper>
+    );
+
+    expect(getByRole('searchbox')).toHaveValue('Rick');
+  });
+
+  test('manages loading states during API calls', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              results: [
+                {
+                  id: 1,
+                  name: 'Morty Smith',
+                  status: 'Alive',
+                  species: 'Human',
+                  image: 'morty.jpg',
+                },
+              ],
+            }),
+        })
+      )
+    );
+
+    const { getByText, queryByText, findByText } = render(
+      <Wrapper>
+        <Stub initialEntries={['/']} />
+      </Wrapper>
+    );
+
+    expect(getByText(/loading/i)).toBeInTheDocument();
+
+    const character = await findByText(/Morty Smith/i);
+    expect(character).toBeInTheDocument();
+
+    expect(queryByText(/loading/i)).not.toBeInTheDocument();
+  });
+
+  test('calls API with correct parameters', () => {
+    const fetchAPI = vi.fn(() =>
       Promise.resolve({
         ok: true,
-        json: () =>
-          Promise.resolve({
-            results: [
-              {
-                id: 1,
-                name: 'Morty Smith',
-                status: 'Alive',
-                species: 'Human',
-                image: 'morty.jpg',
-              },
-            ],
-          }),
+        json: () => Promise.resolve({ results: mockCharacter }),
       })
-    )
-  );
+    );
+    vi.stubGlobal('fetch', fetchAPI);
 
-  const { getByText, queryByText, findByText } = render(
-    <Stub initialEntries={['/']} />
-  );
+    render(
+      <Wrapper>
+        <Stub initialEntries={['/']} />
+      </Wrapper>
+    );
 
-  expect(getByText(/loading/i)).toBeInTheDocument();
-
-  const character = await findByText(/Morty Smith/i);
-  expect(character).toBeInTheDocument();
-
-  expect(queryByText(/loading/i)).not.toBeInTheDocument();
-});
-
-test('calls API with correct parameters', () => {
-  const fetchAPI = vi.fn(() =>
-    Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve({ results: mockCharacter }),
-    })
-  );
-  vi.stubGlobal('fetch', fetchAPI);
-
-  render(<Stub initialEntries={['/']} />);
-
-  expect(fetchAPI).toHaveBeenCalledWith(
-    'https://rickandmortyapi.com/api/character?page=1'
-  );
-});
-
-test('handles successful API responses', async () => {
-  const fetchAPI = vi.fn(() =>
-    Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve({ results: mockCharacter }),
-    })
-  );
-  vi.stubGlobal('fetch', fetchAPI);
-
-  const { getByText } = render(<Stub initialEntries={['/']} />);
-
-  await new Promise((resolve) => setTimeout(resolve, 0));
-  expect(getByText(/rick sanchez/i)).toBeInTheDocument();
-});
-
-test('handles API error responses', async () => {
-  const fetchAPI = vi.fn(() =>
-    Promise.resolve({
-      ok: false,
-      status: 500,
-      statusText: 'Internal Server Error',
-    })
-  );
-  vi.stubGlobal('fetch', fetchAPI);
-  const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-  render(<Stub initialEntries={['/']} />);
-
-  await waitFor(() => {
-    expect(errorSpy).toHaveBeenCalled();
-    expect(errorSpy).toHaveBeenCalledWith(
-      'Error fetching data:',
-      expect.any(Error)
+    expect(fetchAPI).toHaveBeenCalledWith(
+      'https://rickandmortyapi.com/api/character?page=1'
     );
   });
 
-  errorSpy.mockRestore();
-});
-
-test('updates component state based on API responses', async () => {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(() =>
+  test('handles successful API responses', async () => {
+    const fetchAPI = vi.fn(() =>
       Promise.resolve({
         ok: true,
-        json: () =>
-          Promise.resolve({
-            results: [
-              {
-                id: 42,
-                name: 'Birdperson',
-                status: 'Alive',
-                species: 'Bird-Person',
-                image:
-                  'https://rickandmortyapi.com/api/character/avatar/47.jpeg',
-              },
-            ],
-          }),
+        json: () => Promise.resolve({ results: mockCharacter }),
       })
-    )
-  );
+    );
+    vi.stubGlobal('fetch', fetchAPI);
 
-  const { findByText } = render(<Stub initialEntries={['/']} />);
-  const character = await findByText('Birdperson');
+    const { getByText } = render(
+      <Wrapper>
+        <Stub initialEntries={['/']} />
+      </Wrapper>
+    );
 
-  expect(character).toBeInTheDocument();
-});
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(getByText(/rick sanchez/i)).toBeInTheDocument();
+  });
 
-test('manages search term state correctly', async () => {
-  const user = userEvent.setup();
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(() =>
+  test('handles API error responses', async () => {
+    const fetchAPI = vi.fn(() =>
       Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            results: [],
-          }),
+        ok: false,
+        status: 500,
+        statusText: 'Internal Server Error',
       })
-    )
-  );
+    );
+    vi.stubGlobal('fetch', fetchAPI);
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-  const { getByRole } = render(<Stub initialEntries={['/']} />);
+    render(
+      <Wrapper>
+        <Stub initialEntries={['/']} />
+      </Wrapper>
+    );
 
-  const searchInput = getByRole('searchbox');
-  await user.clear(searchInput);
-  await user.type(searchInput, 'Morty');
+    await waitFor(() => {
+      expect(errorSpy).toHaveBeenCalled();
+      expect(errorSpy).toHaveBeenCalledWith(
+        'Error fetching data:',
+        expect.any(Error)
+      );
+    });
 
-  const searchBtn = getByRole('button', { name: /search/i });
-  await user.click(searchBtn);
+    errorSpy.mockRestore();
+  });
 
-  expect(searchInput).toHaveValue('Morty');
+  test('updates component state based on API responses', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              results: [
+                {
+                  id: 42,
+                  name: 'Birdperson',
+                  status: 'Alive',
+                  species: 'Bird-Person',
+                  image:
+                    'https://rickandmortyapi.com/api/character/avatar/47.jpeg',
+                },
+              ],
+            }),
+        })
+      )
+    );
+
+    const { findByText } = render(
+      <Wrapper>
+        <Stub initialEntries={['/']} />
+      </Wrapper>
+    );
+    const character = await findByText('Birdperson');
+
+    expect(character).toBeInTheDocument();
+  });
+
+  test('manages search term state correctly', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              results: [],
+            }),
+        })
+      )
+    );
+
+    const { getByRole } = render(
+      <Wrapper>
+        <Stub initialEntries={['/']} />
+      </Wrapper>
+    );
+
+    const searchInput = getByRole('searchbox');
+    await user.clear(searchInput);
+    await user.type(searchInput, 'Morty');
+
+    const searchBtn = getByRole('button', { name: /search/i });
+    await user.click(searchBtn);
+
+    expect(searchInput).toHaveValue('Morty');
+  });
 });
