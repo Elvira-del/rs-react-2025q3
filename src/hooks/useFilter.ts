@@ -3,9 +3,9 @@ import type { Character, ServerData } from '../pages/home/HomePage';
 
 export function useFilter(data: ServerData, query: string): Character[] {
   const filteredData = useMemo(() => {
-    const characters = data.results;
+    const characters = data?.results;
 
-    return characters.filter((character) =>
+    return characters?.filter((character) =>
       character.name.toLowerCase().includes(query.toLowerCase())
     );
   }, [data, query]);

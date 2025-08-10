@@ -1,8 +1,9 @@
 import { useEffect, useState, type FC } from 'react';
 import { Outlet } from 'react-router';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { useFilter } from '../../hooks/useFilter';
 import { Pagination } from '../../components/pagination/Pagination';
 import { SearchForm } from '../../components/search/SearchForm/SearchForm';
-import { useFilter } from '../../hooks/useFilter';
 import { Loader } from '../../components/loader/Loader';
 import { ResultsList } from './components/ResultsList/ResultsList';
 import { SelectedFlyout } from './components/SelectedFlyout/SelectedFlyout';
@@ -20,37 +21,33 @@ export type ServerData = {
   results: Character[];
 };
 
+const fetchCharacters = async (page: number) => {
+  const url = new URL('https://rickandmortyapi.com/api/character/');
+  url.searchParams.append('page', page.toString());
+
+  const response = await fetch(url.toString());
+  if (!response.ok) throw new Error('Network response was not ok');
+  return response.json();
+};
+
 export const HomePage: FC = () => {
   const [query, setQuery] = useState('');
-  const [serverData, setServerData] = useState<ServerData>({
-    info: {},
-    results: [],
-  });
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const renderData = useFilter(serverData, query);
-
-  const serverUrl = 'https://rickandmortyapi.com/api';
+  const { data, isLoading } = useQuery({
+    queryKey: ['characters', currentPage],
+    queryFn: () => fetchCharacters(currentPage),
+    placeholderData: keepPreviousData,
+  });
+  const filteredData = useFilter(data, query);
 
   useEffect(() => {
-    setIsLoading(true);
-    fetch(`${serverUrl}/character?page=${currentPage}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setServerData(data);
-        setTotalPages(data.info.pages);
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [currentPage]);
+    if (data?.info?.pages) setTotalPages(data.info.pages);
+  }, [data]);
 
   const handleQuery = (query: string): void => {
     setQuery(query);
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page: number) => {
@@ -67,13 +64,18 @@ export const HomePage: FC = () => {
   return (
     <>
       <SearchForm onQuerySubmit={handleQuery} />
-      {isLoading ? <Loader /> : <ResultsList data={renderData} />}
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={isLoading ? () => {} : handlePageChange}
-      />
-
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <>
+          <ResultsList data={filteredData} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={isLoading ? () => {} : handlePageChange}
+          />
+        </>
+      )}
       <Outlet />
       <SelectedFlyout />
     </>

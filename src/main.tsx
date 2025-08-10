@@ -12,6 +12,8 @@ import { AboutPage } from './pages/about/AboutPage.tsx';
 import { HomePage, type Character } from './pages/home/HomePage.tsx';
 import App from './App.tsx';
 import './index.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 export async function detailsLoader({
   params,
@@ -53,11 +55,16 @@ export const router = createBrowserRouter(
   { basename: '/rs-react-2025q3/' }
 );
 
+const queryClient = new QueryClient();
+
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ErrorBoundary fallback={<FallbackUI />}>
-      <RouterProvider router={router} />
-    </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <ErrorBoundary fallback={<FallbackUI />}>
+        <RouterProvider router={router} />
+        <ReactQueryDevtools initialIsOpen={false} />
+      </ErrorBoundary>
+    </QueryClientProvider>
   </StrictMode>
 );
