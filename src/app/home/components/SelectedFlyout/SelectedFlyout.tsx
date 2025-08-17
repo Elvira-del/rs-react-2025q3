@@ -1,7 +1,7 @@
 import type { FC } from 'react';
-import { useStore } from '../../../../app/store';
+import { useStore } from '../../../../store/store';
 import { downloadCSV } from '../../../../utils/downloadCSV';
-import type { Character } from '../../HomePage';
+import type { Character } from '../../../../app/home/page';
 
 export const SelectedFlyout: FC = () => {
   const selectedItems: Character[] = useStore((state) => state.selectedItems);

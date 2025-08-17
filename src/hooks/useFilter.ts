@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { Character, ServerData } from '../pages/home/HomePage';
+import type { Character, ServerData } from '../app/home/page';
 
 export function useFilter(data: ServerData, query: string): Character[] {
   const filteredData = useMemo(() => {

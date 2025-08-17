@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { useNavigate } from 'react-router';
-import type { Character } from '../../HomePage';
-import { useStore } from '../../../../app/store';
+import type { Character } from '../../../../app/home/page';
+import { useStore } from '../../../../store/store';
 
 type ResultsItemProps = {
   character: Character;

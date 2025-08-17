@@ -2,7 +2,7 @@ import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { createRoutesStub } from 'react-router';
 import App from '../../App';
-import { HomePage } from '../../pages/home/HomePage';
+import { HomePage } from '../../app/home/page';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { PropsWithChildren } from 'react';
 

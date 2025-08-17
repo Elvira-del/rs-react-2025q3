@@ -1,4 +1,4 @@
-import type { Character } from '../pages/home/HomePage';
+import type { Character } from '../app/home/page';
 
 export function downloadCSV(items: Character[]): void {
   if (items.length === 0) return;

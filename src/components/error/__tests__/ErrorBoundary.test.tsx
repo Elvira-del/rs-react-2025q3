@@ -6,7 +6,7 @@ import { ErrorTriggerBtn } from '../ErrorTriggerBtn/ErrorTriggerBtn';
 import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
 import { FallbackUI } from '../FallbackUI/FallbackUI';
 import App from '../../../App';
-import { HomePage } from '../../../pages/home/HomePage';
+import { HomePage } from '../../../app/home/page';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { PropsWithChildren } from 'react';
 

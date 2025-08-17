@@ -1,5 +1,5 @@
 import { type FC } from 'react';
-import type { Character } from '../../HomePage';
+import type { Character } from '../../page';
 import { ResultsItem } from '../ResultsItem/ResultsItem';
 
 type ResultsListProps = {

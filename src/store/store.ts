@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Character } from '../pages/home/HomePage';
+import type { Character } from '../app/home/page';
 
 export type StoreState = {
   selectedItems: Character[];

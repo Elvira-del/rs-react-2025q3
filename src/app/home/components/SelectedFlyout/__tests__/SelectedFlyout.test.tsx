@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { useStore } from '../../../../../app/store';
+import { useStore } from '../../../../../store/store';
 import { SelectedFlyout } from '../SelectedFlyout';
 import userEvent from '@testing-library/user-event';
 
