@@ -1,96 +1,56 @@
-import { Component, type JSX, type ReactNode } from 'react';
-import SearchForm from './components/search/SearchForm/SearchForm';
-import ResultsList from './components/results/ResultsList/ResultsList';
-import ErrorTriggerBtn from './components/error/ErrorTriggerBtn/ErrorTriggerBtn';
-import Loader from './components/loader/Loader';
+import { useState, type FC } from 'react';
+import { NavLink, Outlet } from 'react-router';
+import { ErrorTriggerBtn } from './components/error/ErrorTriggerBtn/ErrorTriggerBtn';
 import './App.css';
 
-export type Character = {
-  id: number;
-  name: string;
-  status: string;
-  species: string;
-  image: string;
+const App: FC = () => {
+  const [throwError, setThrowError] = useState(false);
+
+  const handleTriggerError = (): void => {
+    setThrowError(true);
+  };
+
+  if (throwError) {
+    throw new Error('Simulated error for testing ErrorBoundary');
+  }
+  return (
+    <>
+      <header className="mb-10 pt-6">
+        <nav>
+          <ul className="flex justify-center gap-6">
+            <li>
+              <NavLink
+                className={({ isActive, isPending }) =>
+                  `rounded-xl px-5 py-2 font-medium shadow-sm transition focus:ring-2 focus:ring-indigo-200 focus:outline-none ${isActive ? 'border border-indigo-500 bg-indigo-500 text-white shadow' : 'border border-indigo-200 bg-white/90 text-indigo-600 hover:border-indigo-400 hover:bg-indigo-50'} ${isPending ? 'pointer-events-none opacity-60' : ''}`
+                }
+                to="/"
+              >
+                Home
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                className={({ isActive, isPending }) =>
+                  `rounded-xl px-5 py-2 font-medium shadow-sm transition focus:ring-2 focus:ring-indigo-200 focus:outline-none ${isActive ? 'border border-indigo-500 bg-indigo-500 text-white shadow' : 'border border-indigo-200 bg-white/90 text-indigo-600 hover:border-indigo-400 hover:bg-indigo-50'} ${isPending ? 'pointer-events-none opacity-60' : ''}`
+                }
+                to="about"
+              >
+                About
+              </NavLink>
+            </li>
+          </ul>
+        </nav>
+      </header>
+      <main>
+        <section>
+          <Outlet />
+        </section>
+      </main>
+      <footer>
+        <ErrorTriggerBtn onTrigger={handleTriggerError} />
+      </footer>
+    </>
+  );
 };
-
-type AppState = {
-  serverUrl: string;
-  serverData: {
-    info: Record<string, unknown>;
-    results: Character[];
-  };
-  query: string;
-  renderData: Character[];
-  isLoading: boolean;
-  throwError: boolean;
-};
-
-class App extends Component<unknown, AppState> {
-  state = {
-    serverUrl: 'https://rickandmortyapi.com/api',
-    serverData: {
-      info: {},
-      results: [],
-    },
-    query: '',
-    renderData: [],
-    isLoading: false,
-    throwError: false,
-  };
-
-  componentDidMount(): void {
-    this.setState({ isLoading: true });
-    fetch(`${this.state.serverUrl}/character`)
-      .then((response) => response.json())
-      .then((data) => {
-        this.setState({
-          serverData: data,
-          renderData: data.results,
-        });
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error);
-      })
-      .finally(() => {
-        this.setState({ isLoading: false });
-      });
-  }
-
-  componentDidUpdate(_: unknown, prevState: { query: string }): void {
-    if (prevState.query !== this.state.query) {
-      const filteredData = this.state.query
-        ? this.state.serverData.results.filter((item: Character) =>
-            item.name.toLowerCase().includes(this.state.query.toLowerCase())
-          )
-        : this.state.serverData.results;
-      this.setState({ renderData: filteredData });
-    }
-  }
-
-  handleQuery = (query: string): void => {
-    this.setState({ query });
-  };
-
-  handleTriggerError = (): void => {
-    this.setState({ throwError: true });
-  };
-
-  render(): JSX.Element | ReactNode {
-    if (this.state.throwError) {
-      throw new Error('Simulated error for testing ErrorBoundary');
-    }
-    return (
-      <>
-        <ErrorTriggerBtn onTrigger={this.handleTriggerError} />
-        <SearchForm onQuerySubmit={this.handleQuery} />
-        {this.state.isLoading ? (
-          <Loader />
-        ) : (
-          <ResultsList data={this.state.renderData} />
-        )}
-      </>
-    );
-  }
-}
 
 export default App;

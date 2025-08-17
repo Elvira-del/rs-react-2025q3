@@ -1,0 +1,66 @@
+import type { FC } from 'react';
+import { useNavigate } from 'react-router';
+import type { Character } from '../../HomePage';
+import { useStore } from '../../../../app/store';
+
+type ResultsItemProps = {
+  character: Character;
+};
+
+export const ResultsItem: FC<ResultsItemProps> = ({ character }) => {
+  const selectedItems = useStore((state) => state.selectedItems);
+  const onSelectItem = useStore((state) => state.addNewSelectedItems);
+  const onDeselectItem = useStore((state) => state.removeSelectedItem);
+  const navigate = useNavigate();
+
+  const handleSelectItem = (character: Character, checked: boolean) => {
+    if (checked) {
+      onSelectItem(character);
+    } else {
+      onDeselectItem(character.id);
+    }
+  };
+
+  if (!character) return null;
+
+  return (
+    <li
+      className="flex flex-col items-center gap-4 rounded-2xl border border-indigo-100 bg-white/90 p-4 shadow-sm transition hover:shadow-md md:flex-row md:items-center"
+      onClick={() => navigate(`/${character.id}`)}
+      data-testid="character-item"
+    >
+      <input
+        type="checkbox"
+        checked={selectedItems.some(
+          (item: Character) => item.id === character.id
+        )}
+        onClick={(e) => e.stopPropagation()}
+        onChange={(e) => handleSelectItem(character, e.target.checked)}
+        className="mr-4 h-5 w-5 shrink-0 accent-indigo-500"
+        aria-label={`Select ${character.name}`}
+      />
+      <div className="flex flex-1 flex-col items-center gap-1 md:items-start">
+        <h2
+          className="text-lg font-semibold text-gray-900"
+          data-testid="character-name"
+        >
+          {character.name}
+        </h2>
+        <p className="text-sm text-gray-600" data-testid="character-status">
+          <span className="font-medium text-indigo-500">Status:</span>{' '}
+          {character.status}
+        </p>
+        <p className="text-sm text-gray-600" data-testid="character-species">
+          <span className="font-medium text-indigo-500">Species:</span>{' '}
+          {character.species}
+        </p>
+      </div>
+
+      <img
+        src={character.image}
+        alt={character.name}
+        className="h-24 w-24 rounded-xl border border-gray-200 object-cover"
+      />
+    </li>
+  );
+};
