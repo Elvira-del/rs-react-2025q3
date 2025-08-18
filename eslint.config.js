@@ -14,6 +14,7 @@ export default tseslint.config(
       js.configs.recommended,
       ...tseslint.configs.strict,
       eslintPluginPrettier,
+      'plugin:@next/next/recommended',
     ],
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
@@ -35,6 +36,8 @@ export default tseslint.config(
       'react-compiler/react-compiler': 'error',
       ...react.configs.recommended.rules,
       ...react.configs['jsx-runtime'].rules,
+      'react/jsx-uses-react': 'error',
+      'react/jsx-uses-vars': 'error',
     },
     settings: {
       react: {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useFilter } from '../../hooks/useFilter';
 import { Pagination } from './components/Pagination/Pagination';
@@ -23,7 +23,7 @@ export type ServerData = {
   results: Character[];
 };
 
-export default function Page({ children }: { children: ReactNode }) {
+export default function Page() {
   const [query, setQuery] = useState('');
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -68,7 +68,7 @@ export default function Page({ children }: { children: ReactNode }) {
           />
         </>
       )}
-      {children}
+
       <SelectedFlyout />
     </>
   );
