@@ -35,12 +35,10 @@
     ]
   },
   "include": [
-    "./dist/types/**/*.ts",
     "./next-env.d.ts",
     "./src",
     "src/tests-utils/vitest.setup.ts",
-    "vite.config.ts",
-    ".next/types/**/*.ts"
+    "vitest.config.ts"
   ],
-  "exclude": ["./node_modules"]
+  "exclude": ["node_modules", ".next", "dist", "out", "build", "coverage"]
 }

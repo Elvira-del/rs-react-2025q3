@@ -19,8 +19,12 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "*": "npm run format:fix",
-    "*.{ts,tsx}": "npm run lint"
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix"
+    ],
+    "*": [
+      "prettier --write --ignore-unknown"
+    ]
   },
   "dependencies": {
     "@next/eslint-plugin-next": "^15.4.6",
