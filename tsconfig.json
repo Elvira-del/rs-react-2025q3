@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "baseUrl": "/src",
+    "baseUrl": "./src",
     "paths": {
-      "@/*": ["*"]
+      "@/*": ["src/*"]
     },
     "target": "ES2022",
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
@@ -37,8 +37,10 @@
   "include": [
     "./next-env.d.ts",
     "./src",
+    ".next/types/**/*.ts",
     "src/tests-utils/vitest.setup.ts",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "./dist/types/**/*.ts"
   ],
   "exclude": ["node_modules", ".next", "dist", "out", "build", "coverage"]
 }
