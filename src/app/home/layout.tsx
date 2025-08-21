@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 export default function HomeLayout({
@@ -14,9 +14,9 @@ export default function HomeLayout({
   const showDetails = Boolean(searchParams.get('details'));
 
   return (
-    <>
+    <Suspense>
       {children}
       {showDetails && details}
-    </>
+    </Suspense>
   );
 }
