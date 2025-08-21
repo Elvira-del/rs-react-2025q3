@@ -13,6 +13,7 @@ export default function CharacterDetailsPanel() {
     queryKey: ['character', characterId],
     queryFn: () => fetchCharacter(characterId),
     placeholderData: keepPreviousData,
+    enabled: !!characterId,
   });
 
   if (!characterId) return null;

@@ -1,7 +1,5 @@
-'use client';
-
 import { Suspense, type ReactNode } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { Loader } from 'components/loader/Loader';
 
 export default function HomeLayout({
   children,
@@ -10,13 +8,10 @@ export default function HomeLayout({
   children: ReactNode;
   details: ReactNode;
 }) {
-  const searchParams = useSearchParams();
-  const showDetails = Boolean(searchParams.get('details'));
-
   return (
-    <Suspense>
+    <>
       {children}
-      {showDetails && details}
-    </Suspense>
+      <Suspense fallback={<Loader />}>{details}</Suspense>
+    </>
   );
 }
