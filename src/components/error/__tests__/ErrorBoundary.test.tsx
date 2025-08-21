@@ -1,96 +1,125 @@
-import { expect, test, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
+import { describe, expect, test, vi } from 'vitest';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ErrorTriggerBtn from '../ErrorTriggerBtn/ErrorTriggerBtn';
-import FallbackUI from '../FallbackUI/FallbackUI';
+import { createRoutesStub } from 'react-router';
+import { ErrorTriggerBtn } from '../ErrorTriggerBtn/ErrorTriggerBtn';
+import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
+import { FallbackUI } from '../FallbackUI/FallbackUI';
 import App from '../../../App';
+import { HomePage } from '../../../app/home/page';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { PropsWithChildren } from 'react';
 
 const TestError = vi.fn(() => {
   throw new Error('Test error');
 });
 
-test('catches and handles JavaScript errors in child components', async () => {
-  expect(() =>
+const Stub = createRoutesStub([
+  {
+    path: '/',
+    Component: App,
+    ErrorBoundary: FallbackUI,
+    children: [
+      {
+        Component: HomePage,
+        children: [{ index: true, Component: () => null }],
+      },
+    ],
+  },
+]);
+
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+});
+const Wrapper = ({ children }: PropsWithChildren) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
+
+describe('Error boundary tests', () => {
+  test('catches and handles JavaScript errors in child components', async () => {
+    expect(() =>
+      render(
+        <ErrorBoundary fallback={<p>Oops, something went wrong</p>}>
+          <TestError />
+        </ErrorBoundary>
+      )
+    ).not.toThrow();
+  });
+
+  test('displays fallback UI when error occurs', async () => {
+    const { findByText } = render(
+      <ErrorBoundary fallback={<div>Something broke in the multiverse</div>}>
+        <TestError />
+      </ErrorBoundary>
+    );
+
+    const errorText = await findByText(/something broke in the multiverse/i);
+    expect(errorText).toBeInTheDocument();
+  });
+
+  test('logs error to console', () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     render(
       <ErrorBoundary fallback={<p>Oops, something went wrong</p>}>
         <TestError />
       </ErrorBoundary>
-    )
-  ).not.toThrow();
-});
+    );
 
-test('displays fallback UI when error occurs', async () => {
-  render(
-    <ErrorBoundary fallback={<p>Oops, something went wrong</p>}>
-      <TestError />
-    </ErrorBoundary>
-  );
+    expect(errorSpy).toHaveBeenCalled();
 
-  const errorText = await screen.findByText('Oops, something went wrong');
-  expect(errorText).toBeInTheDocument();
-});
+    errorSpy.mockRestore();
+  });
 
-test('logs error to console', () => {
-  const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  test('throws error when test button is clicked', async () => {
+    const user = userEvent.setup();
+    const handleTrigger = vi.fn();
 
-  render(
-    <ErrorBoundary fallback={<p>Oops, something went wrong</p>}>
-      <TestError />
-    </ErrorBoundary>
-  );
+    const { getByRole } = render(<ErrorTriggerBtn onTrigger={handleTrigger} />);
 
-  expect(errorSpy).toHaveBeenCalled();
+    const triggerButton = getByRole('button', { name: /simulate error/i });
+    await user.click(triggerButton);
 
-  errorSpy.mockRestore();
-});
+    expect(handleTrigger).toHaveBeenCalled();
+  });
 
-test('throws error when test button is clicked', async () => {
-  const user = userEvent.setup();
-  const handleTrigger = vi.fn();
+  test('triggers error boundary fallback UI', async () => {
+    const user = userEvent.setup();
 
-  const { getByRole } = render(<ErrorTriggerBtn onTrigger={handleTrigger} />);
+    const { getByRole, findByText } = render(
+      <Wrapper>
+        <ErrorBoundary fallback={<FallbackUI />}>
+          <Stub initialEntries={['/']} />
+        </ErrorBoundary>
+      </Wrapper>
+    );
 
-  const triggerButton = getByRole('button', { name: /simulate error/i });
-  await user.click(triggerButton);
+    const triggerButton = getByRole('button', { name: /simulate error/i });
+    await user.click(triggerButton);
 
-  expect(handleTrigger).toHaveBeenCalled();
-});
+    const fallback = await findByText(/wubba lubba dub dub/i);
+    expect(fallback).toBeInTheDocument();
+  });
 
-test('triggers error boundary fallback UI', async () => {
-  const user = userEvent.setup();
+  test('displays fallback UI when error is triggered by parent', async () => {
+    const user = userEvent.setup();
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-  const { getByRole, findByText } = render(
-    <ErrorBoundary fallback={<FallbackUI />}>
-      <App />
-    </ErrorBoundary>
-  );
+    const { getByRole, findByText } = render(
+      <Wrapper>
+        <Stub initialEntries={['/']} />
+      </Wrapper>
+    );
 
-  const triggerButton = getByRole('button', { name: /simulate error/i });
-  await user.click(triggerButton);
+    const errorBtn = getByRole('button', { name: /simulate error/i });
 
-  const fallback = await findByText(/wubba lubba dub dub/i);
-  expect(fallback).toBeInTheDocument();
-});
+    await user.click(errorBtn);
 
-test('displays fallback UI when error is triggered by parent', async () => {
-  const user = userEvent.setup();
-  const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const fallback = await findByText(/something broke in the multiverse/i);
+    expect(fallback).toBeInTheDocument();
 
-  const { getByRole } = render(
-    <ErrorBoundary fallback={<div>Oops, something went wrong</div>}>
-      <App />
-    </ErrorBoundary>
-  );
+    expect(errorSpy).toHaveBeenCalled();
 
-  const errorBtn = getByRole('button', { name: /simulate error/i });
-
-  await user.click(errorBtn);
-
-  const fallback = await screen.findByText(/oops, something went wrong/i);
-  expect(fallback).toBeInTheDocument();
-
-  expect(errorSpy).toHaveBeenCalled();
-
-  errorSpy.mockRestore();
+    errorSpy.mockRestore();
+  });
 });
