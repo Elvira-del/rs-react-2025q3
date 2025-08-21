@@ -1,17 +1,16 @@
-import type { FC } from 'react';
-import { useNavigate } from 'react-router';
+import Link from 'next/link';
 import type { Character } from '../../../../app/home/page';
 import { useStore } from '../../../../store/store';
+import Image from 'next/image';
 
-type ResultsItemProps = {
+type CharacterItemProps = {
   character: Character;
 };
 
-export const ResultsItem: FC<ResultsItemProps> = ({ character }) => {
+export const CharacterItem = ({ character }: CharacterItemProps) => {
   const selectedItems = useStore((state) => state.selectedItems);
   const onSelectItem = useStore((state) => state.addNewSelectedItems);
   const onDeselectItem = useStore((state) => state.removeSelectedItem);
-  const navigate = useNavigate();
 
   const handleSelectItem = (character: Character, checked: boolean) => {
     if (checked) {
@@ -24,9 +23,12 @@ export const ResultsItem: FC<ResultsItemProps> = ({ character }) => {
   if (!character) return null;
 
   return (
-    <li
+    <Link
       className="flex flex-col items-center gap-4 rounded-2xl border border-indigo-100 bg-white/90 p-4 shadow-sm transition hover:shadow-md md:flex-row md:items-center"
-      onClick={() => navigate(`/${character.id}`)}
+      href={{
+        pathname: '/home',
+        query: { details: character.id },
+      }}
       data-testid="character-item"
     >
       <input
@@ -56,11 +58,13 @@ export const ResultsItem: FC<ResultsItemProps> = ({ character }) => {
         </p>
       </div>
 
-      <img
+      <Image
+        className="h-24 w-24 rounded-xl border border-gray-200 object-cover"
+        width={96}
+        height={96}
         src={character.image}
         alt={character.name}
-        className="h-24 w-24 rounded-xl border border-gray-200 object-cover"
       />
-    </li>
+    </Link>
   );
 };

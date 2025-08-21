@@ -6,15 +6,19 @@ import { useFilter } from '../../hooks/useFilter';
 import { Pagination } from './components/Pagination/Pagination';
 import { SearchForm } from './components/SearchForm/SearchForm';
 import { Loader } from '../../components/loader/Loader';
-import { ResultsList } from './components/ResultsList/ResultsList';
 import { SelectedFlyout } from './components/SelectedFlyout/SelectedFlyout';
 import { fetchCharacters } from '../../api/api';
+import { CharactersList } from './components/CharactersList/CharactersList';
 
 export type Character = {
   id: number;
   name: string;
   status: string;
   species: string;
+  gender: string;
+  location: {
+    name: string;
+  };
   image: string;
 };
 
@@ -23,7 +27,7 @@ export type ServerData = {
   results: Character[];
 };
 
-export default function Page() {
+export default function HomePage() {
   const [query, setQuery] = useState('');
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -60,7 +64,7 @@ export default function Page() {
       {isLoading && <Loader />}
       {!isLoading && filteredData.length && (
         <>
-          <ResultsList data={filteredData} />
+          <CharactersList characters={filteredData} />
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
